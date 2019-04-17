@@ -20,4 +20,10 @@ void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer,
 
 void get_parity(unsigned char *buffer, int server_amount, size_t file_length, unsigned char **parity_file);
 
+void loose_bits(file_part *part_to_loose);
+
+void recover_part(file_part *all_parts, int server_amount, int part_to_recover, unsigned char *parity_file);
+
+void print_descriptive_buffer(file_part * part);
+
 #endif //ERROR_CORRECTION_FILEOPERATIONS_H

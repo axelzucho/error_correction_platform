@@ -10,6 +10,7 @@
 #include "libcrc-2.0/include/checksum.h"
 #include "FileOperations.h"
 
+// TODO: Check file size limitations.
 void divide_buffer(unsigned char *buffer, file_part **all_parts, int server_amount, size_t file_length) {
     *all_parts = malloc(server_amount * sizeof(file_part));
     u_int32_t crc = crc_32(buffer, file_length);
@@ -64,7 +65,7 @@ void read_file(char *filename, unsigned char **buffer, size_t *file_length) {
 }
 
 void get_parity(unsigned char *buffer, int server_amount, size_t file_length, unsigned char **parity_file){
-    *parity_file = calloc(file_length/3 + 1, sizeof(unsigned char));
+    *parity_file = calloc(file_length/server_amount + 2, sizeof(unsigned char));
     bool current_value = false;
 
     for(int i = 0; i < file_length * 8; i++){
@@ -78,7 +79,35 @@ void get_parity(unsigned char *buffer, int server_amount, size_t file_length, un
         }
     }
 
-    int final_shift = 7 - (int)(file_length/server_amount) % 8;
-    (*parity_file)[file_length/(8*server_amount)] |= current_value << final_shift;
+    if(file_length % server_amount != server_amount - 1){
+        int final_shift =  7 - (int)(file_length*8)/server_amount % 8;
+        (*parity_file)[file_length/server_amount] |= current_value << final_shift;
+    }
+}
 
+void loose_bits(file_part *part_to_loose){
+    memset(part_to_loose->buffer, 0, part_to_loose->bit_amount/8 + 1);
+}
+
+void recover_part(file_part *all_parts, int server_amount, int part_to_recover, unsigned char *parity_file){
+    for(int i = 0; i < all_parts[0].bit_amount; i++){
+        bool current_value = false;
+        for(int j = 0; j < server_amount; j++){
+            if(all_parts[j].bit_amount <= i) continue;
+            if(all_parts[j].buffer[i/8] & (1 << (7 - i % 8))) {
+                current_value = !current_value;
+            }
+        }
+        bool current_parity = (bool)(parity_file[i/8] & 1 << (7 - i % 8));
+        if(current_parity != current_value && all_parts[part_to_recover].bit_amount > i){
+            all_parts[part_to_recover].buffer[i/8] |= 1 << (7 - i % 8);
+        }
+    }
+}
+
+void print_descriptive_buffer(file_part * part){
+    for(int i = 0; i < part->bit_amount/8; ++i){
+        printf("%d ", (int)(part->buffer[i]));
+    }
+    printf("\n");
 }
