@@ -63,20 +63,22 @@ void read_file(char *filename, unsigned char **buffer, size_t *file_length) {
     fclose(file);
 }
 
-// TODO (axelzucho): Check final bits.
 void get_parity(unsigned char *buffer, int server_amount, size_t file_length, unsigned char **parity_file){
-    *parity_file = calloc(file_length/3 +1, sizeof(unsigned char));
+    *parity_file = calloc(file_length/3 + 1, sizeof(unsigned char));
     bool current_value = false;
 
     for(int i = 0; i < file_length * 8; i++){
-        if(i % server_amount == 0 && i > 0){
-            (*parity_file)[i/(8*server_amount)] |= current_value << (7 - i % server_amount);
-            current_value = false;
-        }
-
         if(buffer[i / 8] & (1 << (7 - i % 8))){
            current_value = !current_value;
         }
+        if(i % server_amount == server_amount - 1){
+            int shift_value = 7 - (i / server_amount) % 8;
+            (*parity_file)[i/(8*server_amount)] |= current_value << shift_value;
+            current_value = false;
+        }
     }
+
+    int final_shift = 7 - (int)(file_length/server_amount) % 8;
+    (*parity_file)[file_length/(8*server_amount)] |= current_value << final_shift;
 
 }

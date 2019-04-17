@@ -8,6 +8,7 @@
 typedef struct file_part_s {
     size_t bit_amount;
     u_int32_t entire_crc;
+    unsigned char *parity_file;
     unsigned char *buffer;
 } file_part;
 

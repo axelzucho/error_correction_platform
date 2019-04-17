@@ -8,7 +8,6 @@
 
 #define STR_LEN 100
 
-
 void menu() {
     printf("%d", 1 << 7);
     char filename[STR_LEN];
@@ -23,9 +22,11 @@ void menu() {
 
     printf("Please enter the number of servers you want to distribute this file to:\n");
     //scanf("%d", &number_of_servers);
-    number_of_servers = 10;
+    number_of_servers = 3;
 
     read_file(filename, &buffer, &file_length);
+    unsigned char *parity = NULL;
+    get_parity(buffer, number_of_servers, file_length, &parity);
     divide_buffer(buffer, &all_parts, number_of_servers, file_length);
     memset(buffer, 0, file_length);
     merge_parts(all_parts, number_of_servers, buffer, file_length);
