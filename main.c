@@ -28,6 +28,7 @@ void menu() {
     get_parity(buffer, number_of_servers, file_length, &parity);
     divide_buffer(buffer, &all_parts, number_of_servers, file_length);
     memset(buffer, 0, file_length);
+    merge_parts(all_parts, number_of_servers, buffer, file_length);
     loose_bits(&all_parts[1]);
     recover_part(all_parts, number_of_servers, 1, parity);
     merge_parts(all_parts, number_of_servers, buffer, file_length);

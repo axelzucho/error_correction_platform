@@ -10,14 +10,13 @@
 #include "libcrc-2.0/include/checksum.h"
 #include "FileOperations.h"
 
-// TODO: Check file size limitations.
 void divide_buffer(unsigned char *buffer, file_part **all_parts, int server_amount, size_t file_length) {
     *all_parts = malloc(server_amount * sizeof(file_part));
     u_int32_t crc = crc_32(buffer, file_length);
 
     for (int i = 0; i < server_amount; ++i) {
         (*all_parts)[i].entire_crc = crc;
-        (*all_parts)[i].buffer = calloc(file_length / (server_amount * 8) + 1, sizeof(unsigned char));
+        (*all_parts)[i].buffer = calloc(file_length/server_amount + 1, sizeof(unsigned char));
         (*all_parts)[i].bit_amount = (file_length * 8) / server_amount + 1;
     }
 
