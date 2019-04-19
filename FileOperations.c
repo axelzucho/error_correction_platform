@@ -13,8 +13,6 @@
 #include "sockets/sockets.h"
 #include "tools.h"
 
-#define MAX_STR_LEN 100000
-
 void divide_buffer(unsigned char *buffer, file_part **all_parts, int server_amount, size_t file_length) {
     *all_parts = malloc(server_amount * sizeof(file_part));
     u_int32_t crc = crc_32(buffer, file_length);
@@ -116,63 +114,3 @@ void print_descriptive_buffer(file_part * part){
     printf("\n");
 }
 
-void receive_file(int connection_fd, file_part *part){
-    char *buffer = malloc(MAX_STR_LEN);
-    recvString(connection_fd, buffer, MAX_STR_LEN);
-    part->bit_amount = ((file_part *)buffer)->bit_amount;
-    part->entire_crc = ((file_part *)buffer)->entire_crc;
-    part->buffer = ((file_part *)buffer)->buffer;
-    part->parity_file = ((file_part *)buffer)->parity_file;
-}
-
-void single_server(){
-    file_part* part = malloc(sizeof(file_part));
-    int connection_fd = connectSocket("localhost", "9900");
-    receive_file(connection_fd, part);
-    char buffer[MAX_STR_LEN];
-    do{
-        recvString(connection_fd, buffer, 100);
-    } while(perform_action(buffer, connection_fd, part));
-}
-
-void create_all_servers(int *connection_fds, int server_amount){
-    int main_fd = initServer("9900", server_amount);
-    pid_t new_pid;
-    for(int i = 0; i < server_amount; i++){
-        new_pid = fork();
-        if(new_pid == 0){
-            close(main_fd);
-            single_server();
-            exit(EXIT_SUCCESS);
-        } else {
-            int client_fd = accept(main_fd, NULL, NULL);
-            connection_fds[i] = client_fd;
-        }
-    }
-
-}
-
-void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts){
-    for(int i = 0; i < server_amount; ++i){
-        sendString(connection_fds[i], (void*)&all_parts[i], sizeof(all_parts));
-    }
-}
-
-void receive_all_parts(int *connection_fds, int server_amount, file_part *all_parts){
-    for (int i = 0; i < server_amount; i++){
-        sendString(connection_fds[i], (void *)SEND_PARTS_STR, (int)strlen(SEND_PARTS_STR) + 1);
-    }
-    for (int i = 0; i < server_amount; i++) {
-        char *buffer = malloc(MAX_STR_LEN);
-        recvString(connection_fds[i], buffer, MAX_STR_LEN);
-        all_parts[i] = *((file_part *)buffer);
-    }
-}
-
-bool perform_action(char *buffer, int connection_fd, file_part *part){
-    if(strcmp(buffer, SEND_PARTS_STR) == 0){
-        sendString(connection_fd, (void *)part, sizeof(file_part *));
-        return true;
-    }
-    return false;
-}
