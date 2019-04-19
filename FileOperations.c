@@ -101,14 +101,23 @@ void get_parity(unsigned char *buffer, int server_amount, size_t file_length, un
 }
 
 void loose_bits(file_part *part_to_loose) {
-    memset(part_to_loose->buffer, 0, part_to_loose->bit_amount / 8 + 1);
+    memset(part_to_loose->buffer, 0, (size_t)ceil((double)part_to_loose->bit_amount / 8));
+    if(part_to_loose->parity_size > 0){
+        memset(part_to_loose->parity_file, 0, (size_t)part_to_loose->parity_size);
+        part_to_loose->parity_size = 0;
+    }
+    part_to_loose->bit_amount = 0;
 }
 
 void recover_part(file_part *all_parts, int server_amount, int part_to_recover, unsigned char *parity_file) {
-    for (int i = 0; i < all_parts[0].bit_amount; i++) {
+    int reference = part_to_recover == 0 ? 1:0;
+    all_parts[part_to_recover].bit_amount = all_parts[reference].bit_amount;
+    all_parts[part_to_recover].buffer = calloc((size_t)ceil((double)all_parts[part_to_recover].bit_amount / 8), sizeof(unsigned char));
+
+    for (int i = 0; i < all_parts[reference].bit_amount; i++) {
         bool current_value = false;
         for (int j = 0; j < server_amount; j++) {
-            if (all_parts[j].bit_amount <= i) continue;
+            if (all_parts[j].bit_amount <= i || j == part_to_recover) continue;
             if (all_parts[j].buffer[i / 8] & (1 << (7 - i % 8))) {
                 current_value = !current_value;
             }

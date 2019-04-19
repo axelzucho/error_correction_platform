@@ -19,8 +19,12 @@ void receive_file(int connection_fd, file_part *part) {
     int buff_size = (int) ceil((double) part->bit_amount / 8) + 1;
 
     recvString(connection_fd, buffer, buff_size);
-    part->buffer = malloc(buff_size * sizeof(unsigned char) + 1);
-    strcpy((char *) part->buffer, buffer);
+    if(bit_amount > 0){
+        part->buffer = malloc(buff_size * sizeof(unsigned char) + 1);
+        strcpy((char *) part->buffer, buffer);
+    } else{
+        part->buffer = NULL;
+    }
     sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
 
     recvString(connection_fd, buffer, MAX_STR_LEN);
@@ -30,7 +34,7 @@ void receive_file(int connection_fd, file_part *part) {
     recvString(connection_fd, buffer, MAX_STR_LEN);
     sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
     if (strcmp(buffer, NO_INFORMATION) == 0) {
-        return;
+        part->parity_file = NULL;
     } else {
         part->parity_file = malloc(part->parity_size * sizeof(unsigned char));
         strcpy((char *) part->parity_file, buffer);
@@ -71,7 +75,13 @@ void send_single_part(int connection_fd, file_part *part) {
     sendString(connection_fd, int_buff, (int) strlen(int_buff));
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
-    sendString(connection_fd, (char *) part->buffer, buffer_size);
+    if(part->bit_amount == 0){
+        sendString(connection_fd, NO_INFORMATION, NO_INFORMATION);
+        printf("SENDING BUFFER for connection: %d\n", connection_fd);
+    } else {
+        sendString(connection_fd, (char *) part->buffer, buffer_size);
+    }
+
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
     char parity_size[100];
@@ -104,17 +114,21 @@ void receive_all_parts(int *connection_fds, int server_amount, file_part *all_pa
     }
 }
 
-void clear_information(file_part *part) {
-    return;
-}
-
 bool perform_action(char *buffer, int connection_fd, file_part *part) {
     if (strcmp(buffer, SEND_PARTS_STR) == 0) {
         send_single_part(connection_fd, part);
         return false;
     } else if (strcmp(buffer, DELETE_PART_STR) == 0) {
-        clear_information(part);
+        loose_bits(part);
+        printf("ARRIVED HERE!\n");
         sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+        return true;
     }
     return true;
+}
+
+void send_clear_instruction(int connection_fd){
+    char buffer[MAX_STR_LEN];
+    sendString(connection_fd, DELETE_PART_STR, (int)strlen(DELETE_PART_STR));
+    recvString(connection_fd, buffer, MAX_STR_LEN);
 }
