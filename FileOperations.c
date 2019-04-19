@@ -8,16 +8,13 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "libcrc-2.0/include/checksum.h"
 #include "FileOperations.h"
 
 void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all_parts, int server_amount,
                    size_t file_length) {
     *all_parts = malloc(server_amount * sizeof(file_part));
-    u_int32_t crc = crc_32(buffer, file_length);
     int parity_size = (int) ceil((double) file_length / server_amount) + 1;
     for (int i = 0; i < server_amount; ++i) {
-        (*all_parts)[i].entire_crc = crc;
         (*all_parts)[i].buffer = calloc(file_length / server_amount + 2, sizeof(unsigned char));
         (*all_parts)[i].bit_amount = (file_length * 8) / server_amount + (i < file_length % server_amount);
 
@@ -137,4 +134,21 @@ void print_descriptive_buffer(file_part *part) {
         printf("%d ", (int) (part->buffer[i]));
     }
     printf("\n");
+}
+
+void free_part(file_part *part){
+    if(part->buffer != NULL){
+        free(part->buffer);
+    }
+    if(part->parity_file != NULL){
+        free(part->parity_file);
+    }
+    free(part);
+}
+
+void free_parts(file_part **parts, int server_amount){
+    for(int i = 0; i < server_amount; ++i){
+        free_part(&((*parts)[i]));
+    }
+    //free(parts);
 }

@@ -49,6 +49,9 @@ void single_server() {
     do {
         recvString(connection_fd, buffer, 100);
     } while (perform_action(buffer, connection_fd, part));
+
+    free(part);
+    close(connection_fd);
 }
 
 void create_all_servers(int *connection_fds, int server_amount) {

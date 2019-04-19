@@ -9,7 +9,6 @@
 
 typedef struct file_part_s {
     size_t bit_amount;
-    u_int32_t entire_crc;
     unsigned char *buffer;
     int parity_size;
     unsigned char *parity_file;
@@ -28,5 +27,9 @@ void loose_bits(file_part *part_to_loose);
 void recover_part(file_part *all_parts, int server_amount, int part_to_recover, unsigned char *parity_file);
 
 void print_descriptive_buffer(file_part * part);
+
+void free_part(file_part *part);
+
+void free_parts(file_part **parts, int server_amount);
 
 #endif //ERROR_CORRECTION_FILEOPERATIONS_H
