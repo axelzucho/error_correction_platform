@@ -111,10 +111,12 @@ void loose_bits(file_part *part_to_loose) {
 
 void recover_part(file_part *all_parts, int server_amount, int part_to_recover, unsigned char *parity_file) {
     int reference = part_to_recover == 0 ? 1:0;
-    all_parts[part_to_recover].bit_amount = all_parts[reference].bit_amount;
+    // An extra bit would ensure that we never loose information. If that extra bit is a 0, then it doesn't affect the file.
+    all_parts[part_to_recover].bit_amount = all_parts[reference].bit_amount + 1;
     all_parts[part_to_recover].buffer = calloc((size_t)ceil((double)all_parts[part_to_recover].bit_amount / 8), sizeof(unsigned char));
 
-    for (int i = 0; i < all_parts[reference].bit_amount; i++) {
+    // Iterate till an extra bit for a special case.
+    for (int i = 0; i <= all_parts[reference].bit_amount; i++) {
         bool current_value = false;
         for (int j = 0; j < server_amount; j++) {
             if (all_parts[j].bit_amount <= i || j == part_to_recover) continue;
@@ -127,6 +129,7 @@ void recover_part(file_part *all_parts, int server_amount, int part_to_recover, 
             all_parts[part_to_recover].buffer[i / 8] |= 1 << (7 - i % 8);
         }
     }
+
 }
 
 void print_descriptive_buffer(file_part *part) {
