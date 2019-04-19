@@ -49,7 +49,7 @@ void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all
 
 void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer, size_t file_length) {
     for (int i = 0; i < file_length * 8; ++i) {
-        if (i / server_amount > all_parts[i % server_amount].bit_amount) {
+        if (i / server_amount >= all_parts[i % server_amount].bit_amount) {
             continue;
         }
         bool current_val = (bool) (all_parts[i % server_amount].buffer[i / (server_amount * 8)] &

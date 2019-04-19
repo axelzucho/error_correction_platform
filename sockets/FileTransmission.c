@@ -77,7 +77,6 @@ void send_single_part(int connection_fd, file_part *part) {
 
     if(part->bit_amount == 0){
         sendString(connection_fd, NO_INFORMATION, NO_INFORMATION);
-        printf("SENDING BUFFER for connection: %d\n", connection_fd);
     } else {
         sendString(connection_fd, (char *) part->buffer, buffer_size);
     }
@@ -120,7 +119,6 @@ bool perform_action(char *buffer, int connection_fd, file_part *part) {
         return false;
     } else if (strcmp(buffer, DELETE_PART_STR) == 0) {
         loose_bits(part);
-        printf("ARRIVED HERE!\n");
         sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
         return true;
     }
