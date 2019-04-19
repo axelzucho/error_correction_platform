@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include "libcrc-2.0/include/checksum.h"
 
 #include "FileOperations.h"
@@ -31,9 +30,9 @@ void menu() {
     unsigned char *parity = NULL;
 
     get_parity(buffer, number_of_servers, file_length, &parity);
-    divide_buffer(buffer, &all_parts, number_of_servers, file_length);
+    divide_buffer(buffer, parity, &all_parts, number_of_servers, file_length);
     send_all_parts(connection_fds, number_of_servers, all_parts);
-    file_part * new_parts = calloc(sizeof(file_part), number_of_servers);
+    file_part *new_parts = calloc(sizeof(file_part), number_of_servers);
     receive_all_parts(connection_fds, number_of_servers, new_parts);
     memset(buffer, 0, file_length);
     merge_parts(new_parts, number_of_servers, buffer, file_length);

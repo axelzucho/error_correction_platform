@@ -7,44 +7,52 @@
 #include "../tools.h"
 #include "sockets.h"
 
-void receive_file(int connection_fd, file_part *part){
+void receive_file(int connection_fd, file_part *part) {
     char buffer[MAX_STR_LEN];
     recvString(connection_fd, buffer, MAX_STR_LEN);
-    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
 
     int bit_amount;
     sscanf(buffer, "%d", &bit_amount);
-    part->bit_amount = (size_t)bit_amount;
+    part->bit_amount = (size_t) bit_amount;
 
-    int buff_size = (int)ceil((double)part->bit_amount/8) + 1;
-
+    int buff_size = (int) ceil((double) part->bit_amount / 8) + 1;
 
     recvString(connection_fd, buffer, buff_size);
-    unsigned char *buffer_to_pass = (unsigned char*)buffer;
     part->buffer = malloc(buff_size * sizeof(unsigned char) + 1);
-    for(int i = 0; i < buff_size; ++i){
-        part->buffer[i] = buffer_to_pass[i];
+    strcpy((char *) part->buffer, buffer);
+    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+
+    recvString(connection_fd, buffer, MAX_STR_LEN);
+    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+    sscanf(buffer, "%d", &part->parity_size);
+
+    recvString(connection_fd, buffer, MAX_STR_LEN);
+    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+    if (strcmp(buffer, NO_INFORMATION) == 0) {
+        return;
+    } else {
+        part->parity_file = malloc(part->parity_size * sizeof(unsigned char));
+        strcpy((char *) part->parity_file, buffer);
     }
-    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
 }
 
-void single_server(){
-    file_part* part = malloc(sizeof(file_part));
+void single_server() {
+    file_part *part = malloc(sizeof(file_part));
     int connection_fd = connectSocket("localhost", "9900");
     receive_file(connection_fd, part);
     char buffer[MAX_STR_LEN];
-    do{
+    do {
         recvString(connection_fd, buffer, 100);
-        printf("Connection fd: %d REACHED HERE\n", connection_fd);
-    } while(perform_action(buffer, connection_fd, part));
+    } while (perform_action(buffer, connection_fd, part));
 }
 
-void create_all_servers(int *connection_fds, int server_amount){
+void create_all_servers(int *connection_fds, int server_amount) {
     int main_fd = initServer("9900", server_amount);
     pid_t new_pid;
-    for(int i = 0; i < server_amount; i++){
+    for (int i = 0; i < server_amount; i++) {
         new_pid = fork();
-        if(new_pid == 0){
+        if (new_pid == 0) {
             close(main_fd);
             single_server();
             exit(EXIT_SUCCESS);
@@ -56,38 +64,57 @@ void create_all_servers(int *connection_fds, int server_amount){
 
 }
 
-void send_single_part(int connection_fd, file_part * part){
+void send_single_part(int connection_fd, file_part *part) {
     char int_buff[100];
-    int buffer_size = (int)ceil((double)part->bit_amount / 8);
-    sprintf(int_buff, "%d", (int)(part->bit_amount));
-    sendString(connection_fd, int_buff, (int)strlen(int_buff));
-    recvString(connection_fd, int_buff, (int)strlen(RECEIVED_MESSAGE));
+    int buffer_size = (int) ceil((double) part->bit_amount / 8);
+    sprintf(int_buff, "%d", (int) (part->bit_amount));
+    sendString(connection_fd, int_buff, (int) strlen(int_buff));
+    recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
-    //sendString(connection_fd, (char *)part->buffer, MAX_STR_LEN);
-    printf("BUFFER SIZE: %d\n", buffer_size);
-    sendString(connection_fd, (char *)part->buffer, buffer_size);
-    recvString(connection_fd, int_buff, (int)strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, (char *) part->buffer, buffer_size);
+    recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+
+    char parity_size[100];
+    sprintf(parity_size, "%d", part->parity_size);
+    sendString(connection_fd, parity_size, (int) strlen(int_buff));
+    recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+
+    if (part->parity_size > 0) {
+        sendString(connection_fd, (char *) part->parity_file, part->parity_size);
+        recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+    } else {
+        sendString(connection_fd, NO_INFORMATION, (int) strlen(NO_INFORMATION));
+        recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+    }
 }
 
-void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts){
-    for(int i = 0; i < server_amount; ++i){
+
+void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts) {
+    for (int i = 0; i < server_amount; ++i) {
         send_single_part(connection_fds[i], &all_parts[i]);
     }
 }
 
-void receive_all_parts(int *connection_fds, int server_amount, file_part *all_parts){
-    for (int i = 0; i < server_amount; i++){
-        sendString(connection_fds[i], (void *)SEND_PARTS_STR, (int)strlen(SEND_PARTS_STR) + 1);
+void receive_all_parts(int *connection_fds, int server_amount, file_part *all_parts) {
+    for (int i = 0; i < server_amount; i++) {
+        sendString(connection_fds[i], (void *) SEND_PARTS_STR, (int) strlen(SEND_PARTS_STR) + 1);
     }
     for (int i = 0; i < server_amount; i++) {
         receive_file(connection_fds[i], &all_parts[i]);
     }
 }
 
-bool perform_action(char *buffer, int connection_fd, file_part *part){
-    if(strcmp(buffer, SEND_PARTS_STR) == 0){
+void clear_information(file_part *part) {
+    return;
+}
+
+bool perform_action(char *buffer, int connection_fd, file_part *part) {
+    if (strcmp(buffer, SEND_PARTS_STR) == 0) {
         send_single_part(connection_fd, part);
-        return true;
+        return false;
+    } else if (strcmp(buffer, DELETE_PART_STR) == 0) {
+        clear_information(part);
+        sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
     }
     return true;
 }

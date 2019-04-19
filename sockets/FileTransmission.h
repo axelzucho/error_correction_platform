@@ -15,6 +15,8 @@ void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts
 
 void receive_all_parts(int *connection_fds, int server_amount, file_part *all_parts);
 
+void clear_information(file_part * part);
+
 bool perform_action(char *buffer, int connection_fd, file_part *part);
 
 #endif //ERROR_CORRECTION_FILETRANSMISSION_H

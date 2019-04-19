@@ -10,13 +10,14 @@
 typedef struct file_part_s {
     size_t bit_amount;
     u_int32_t entire_crc;
-    unsigned char *parity_file;
     unsigned char *buffer;
+    int parity_size;
+    unsigned char *parity_file;
 } file_part;
 
 void read_file(char *filename, unsigned char **buffer, size_t *file_length);
 
-void divide_buffer(unsigned char *buffer, file_part **all_parts, int server_amount, size_t file_length);
+void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all_parts, int server_amount, size_t file_length);
 
 void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer, size_t file_length);
 
