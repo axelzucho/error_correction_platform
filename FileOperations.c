@@ -19,8 +19,8 @@ void divide_buffer(unsigned char *buffer, file_part **all_parts, int server_amou
 
     for (int i = 0; i < server_amount; ++i) {
         (*all_parts)[i].entire_crc = crc;
-        (*all_parts)[i].buffer = calloc(file_length/server_amount + 1, sizeof(unsigned char));
-        (*all_parts)[i].bit_amount = (file_length * 8) / server_amount + 1;
+        (*all_parts)[i].buffer = calloc(file_length/server_amount + 2, sizeof(unsigned char));
+        (*all_parts)[i].bit_amount = (file_length * 8) / server_amount + (i < file_length%server_amount);
     }
 
     for (int i = 0; i < file_length * 8; ++i) {
@@ -31,6 +31,10 @@ void divide_buffer(unsigned char *buffer, file_part **all_parts, int server_amou
         int shift_amount = 7 - (i / server_amount) % 8;
 
         (*all_parts)[i % server_amount].buffer[i / (server_amount * 8)] |= current_val << shift_amount;
+    }
+
+    for(int i = 0; i < server_amount; i++){
+        (*all_parts)[i].buffer[file_length/(server_amount) + 1] = '\0';
     }
 }
 

@@ -2,6 +2,7 @@
 // Created by axelzucho on 19/04/19.
 //
 
+#include <math.h>
 #include "FileTransmission.h"
 #include "../tools.h"
 #include "sockets.h"
@@ -9,17 +10,22 @@
 void receive_file(int connection_fd, file_part *part){
     char buffer[MAX_STR_LEN];
     recvString(connection_fd, buffer, MAX_STR_LEN);
+    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
 
     int bit_amount;
     sscanf(buffer, "%d", &bit_amount);
     part->bit_amount = (size_t)bit_amount;
 
-    recvString(connection_fd, buffer, MAX_STR_LEN);
+    int buff_size = (int)ceil((double)part->bit_amount/8) + 1;
+
+
+    recvString(connection_fd, buffer, buff_size);
     unsigned char *buffer_to_pass = (unsigned char*)buffer;
-    part->buffer = malloc(strlen(buffer) * sizeof(unsigned char));
-    for(int i = 0; i < strlen(buffer); ++i){
+    part->buffer = malloc(buff_size * sizeof(unsigned char) + 1);
+    for(int i = 0; i < buff_size; ++i){
         part->buffer[i] = buffer_to_pass[i];
     }
+    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
 }
 
 void single_server(){
@@ -29,6 +35,7 @@ void single_server(){
     char buffer[MAX_STR_LEN];
     do{
         recvString(connection_fd, buffer, 100);
+        printf("Connection fd: %d REACHED HERE\n", connection_fd);
     } while(perform_action(buffer, connection_fd, part));
 }
 
@@ -51,9 +58,15 @@ void create_all_servers(int *connection_fds, int server_amount){
 
 void send_single_part(int connection_fd, file_part * part){
     char int_buff[100];
+    int buffer_size = (int)ceil((double)part->bit_amount / 8);
     sprintf(int_buff, "%d", (int)(part->bit_amount));
     sendString(connection_fd, int_buff, (int)strlen(int_buff));
-    sendString(connection_fd, part->buffer, MAX_STR_LEN);
+    recvString(connection_fd, int_buff, (int)strlen(RECEIVED_MESSAGE));
+
+    //sendString(connection_fd, (char *)part->buffer, MAX_STR_LEN);
+    printf("BUFFER SIZE: %d\n", buffer_size);
+    sendString(connection_fd, (char *)part->buffer, buffer_size);
+    recvString(connection_fd, int_buff, (int)strlen(RECEIVED_MESSAGE));
 }
 
 void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts){

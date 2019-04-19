@@ -36,10 +36,10 @@ void menu() {
     file_part * new_parts = calloc(sizeof(file_part), number_of_servers);
     receive_all_parts(connection_fds, number_of_servers, new_parts);
     memset(buffer, 0, file_length);
-    merge_parts(all_parts, number_of_servers, buffer, file_length);
-    loose_bits(&all_parts[1]);
-    recover_part(all_parts, number_of_servers, 1, parity);
-    merge_parts(all_parts, number_of_servers, buffer, file_length);
+    merge_parts(new_parts, number_of_servers, buffer, file_length);
+    //loose_bits(&all_parts[1]);
+    //recover_part(all_parts, number_of_servers, 1, parity);
+    //merge_parts(all_parts, number_of_servers, buffer, file_length);
 
     if (all_parts[0].entire_crc == crc_32(buffer, file_length)) printf("They are the same!\n");
 
