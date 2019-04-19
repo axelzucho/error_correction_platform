@@ -1,0 +1,10 @@
+//
+// Created by axelzucho on 19/04/19.
+//
+
+#ifndef ERROR_CORRECTION_TOOLS_H
+#define ERROR_CORRECTION_TOOLS_H
+
+#define SEND_PARTS_STR "SEND_ME_YOUR_PARTS"
+
+#endif //ERROR_CORRECTION_TOOLS_H
