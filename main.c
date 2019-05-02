@@ -6,7 +6,7 @@
 #include "FileOperations.h"
 #include "sockets/FileTransmission.h"
 
-#define STR_LEN 100
+#define STR_LEN 100000
 
 
 // TODO: Check double free error.
@@ -32,7 +32,9 @@ void menu() {
     unsigned char *parity = NULL;
     get_parity(buffer, number_of_servers, file_length, &parity);
     divide_buffer(buffer, parity, &all_parts, number_of_servers, file_length);
+    printf("Before sending all parts\n");
     send_all_parts(connection_fds, number_of_servers, all_parts);
+    printf("After sending all parts\n");
     u_int32_t entire_crc = crc_32(buffer, file_length);
 
     printf("The file was separated and sent to three servers. Each server contains one third of the file\n");

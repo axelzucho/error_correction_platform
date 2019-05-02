@@ -47,7 +47,7 @@ void single_server() {
     receive_file(connection_fd, part);
     char buffer[MAX_STR_LEN];
     do {
-        recvString(connection_fd, buffer, 100);
+        recvString(connection_fd, buffer, MAX_STR_LEN);
     } while (perform_action(buffer, connection_fd, part));
 
     free(part);
@@ -72,21 +72,21 @@ void create_all_servers(int *connection_fds, int server_amount) {
 }
 
 void send_single_part(int connection_fd, file_part *part) {
-    char int_buff[100];
+    char int_buff[MAX_PARITY_LEN];
     int buffer_size = (int) ceil((double) part->bit_amount / 8);
     sprintf(int_buff, "%d", (int) (part->bit_amount));
     sendString(connection_fd, int_buff, (int) strlen(int_buff));
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
     if(part->bit_amount == 0){
-        sendString(connection_fd, NO_INFORMATION, NO_INFORMATION);
+        sendString(connection_fd, NO_INFORMATION, (int) strlen(NO_INFORMATION));
     } else {
         sendString(connection_fd, (char *) part->buffer, buffer_size);
     }
 
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
-    char parity_size[100];
+    char parity_size[MAX_PARITY_LEN];
     sprintf(parity_size, "%d", part->parity_size);
     sendString(connection_fd, parity_size, (int) strlen(int_buff));
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
