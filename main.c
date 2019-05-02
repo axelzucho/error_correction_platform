@@ -20,7 +20,7 @@ void menu() {
     printf("Please enter the file you want to test with:\n");
 
     //scanf("%s", filename);
-    strcpy(filename, "../HOT_Balloon_Trip.ppm");
+    strcpy(filename, "HOT_Balloon_Trip.ppm");
 
     number_of_servers = 3;
 
@@ -39,7 +39,8 @@ void menu() {
     printf("The file was separated and sent to three servers. Each server contains one third of the file\n");
     printf("Please enter the server you want to attack (0, 1, or 2):\n");
     int server_attacked;
-    scanf("%d", &server_attacked);
+    //scanf("%d", &server_attacked);
+    server_attacked = 0;
     free_parts(&all_parts, number_of_servers);
 
     send_clear_instruction(connection_fds[server_attacked]);
