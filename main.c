@@ -20,7 +20,7 @@ void menu() {
     printf("Please enter the file you want to test with:\n");
 
     //scanf("%s", filename);
-    strcpy(filename, "../example.txt");
+    strcpy(filename, "../HOT_Balloon_Trip.ppm");
 
     number_of_servers = 3;
 
@@ -55,7 +55,7 @@ void menu() {
     recover_part(new_parts, number_of_servers, server_attacked, parity);
     merge_parts(new_parts, number_of_servers, buffer, file_length);
     printf("After recovery, your file is:\n");
-    printf("FILE: %s\n", buffer);
+    //printf("FILE: %s\n", buffer);
 
     if (entire_crc == crc_32(buffer, file_length)) {
         printf("File successfully recovered... They are the same!\n");
