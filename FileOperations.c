@@ -143,12 +143,11 @@ void free_part(file_part *part){
     if(part->parity_file != NULL){
         free(part->parity_file);
     }
-    free(part);
 }
 
 void free_parts(file_part **parts, int server_amount){
     for(int i = 0; i < server_amount; ++i){
         free_part(&((*parts)[i]));
     }
-    //free(parts);
+    free(*parts);
 }

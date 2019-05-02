@@ -9,7 +9,6 @@
 #define STR_LEN 100000
 
 
-// TODO: Check double free error.
 void menu() {
     char filename[STR_LEN];
     int number_of_servers;
@@ -27,7 +26,7 @@ void menu() {
 
     read_file(filename, &buffer, &file_length);
 
-    int *connection_fds = malloc(3 * sizeof(int));
+    int *connection_fds = malloc(number_of_servers * sizeof(int));
     create_all_servers(connection_fds, 3);
     unsigned char *parity = NULL;
     get_parity(buffer, number_of_servers, file_length, &parity);
@@ -41,7 +40,7 @@ void menu() {
     printf("Please enter the server you want to attack (0, 1, or 2):\n");
     int server_attacked;
     scanf("%d", &server_attacked);
-    //free_parts(&all_parts, number_of_servers);
+    free_parts(&all_parts, number_of_servers);
 
     send_clear_instruction(connection_fds[server_attacked]);
     file_part *new_parts = calloc(sizeof(file_part), (size_t)number_of_servers);
@@ -64,7 +63,8 @@ void menu() {
         printf("Hmmm, this wasn't recovered correctly... Tough one!\n");
     }
 
-    //free_parts(&new_parts, number_of_servers);
+    free(connection_fds);
+    free_parts(&new_parts, number_of_servers);
 }
 
 int main() {
