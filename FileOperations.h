@@ -16,6 +16,8 @@ typedef struct file_part_s {
 
 void read_file(char *filename, unsigned char **buffer, size_t *file_length);
 
+void write_file(char *filename, unsigned char *buffer, size_t file_length);
+
 void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all_parts, int server_amount, size_t file_length);
 
 void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer, size_t file_length);

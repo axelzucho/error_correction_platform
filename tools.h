@@ -12,4 +12,8 @@
 #define MAX_STR_LEN 1000000
 #define MAX_PARITY_LEN 100000
 
+#include <string.h>
+#include <stdio.h>
+
+
 #endif //ERROR_CORRECTION_TOOLS_H

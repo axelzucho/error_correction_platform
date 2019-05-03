@@ -5,8 +5,16 @@
 
 #include "FileOperations.h"
 #include "sockets/FileTransmission.h"
+#include "tools.h"
 
 #define STR_LEN 100000
+
+void cat_before_ext(char *filename, char* adding, char dest[STR_LEN]){
+    char *raw = strchr(filename, '.');
+    strncpy(dest, filename, raw - filename);
+    strcat(dest, adding);
+    strcat(dest, raw);
+}
 
 
 void menu() {
@@ -48,9 +56,12 @@ void menu() {
     receive_all_parts(connection_fds, number_of_servers, new_parts);
 
     memset(buffer, 0, file_length);
-    printf("Before recovery, your file looks like this:\n");
     merge_parts(new_parts, number_of_servers, buffer, file_length);
-    printf("FILE: %s\n", buffer);
+    char broken_file[STR_LEN];
+    cat_before_ext(filename, "_broken", broken_file);
+    write_file(broken_file, buffer, file_length);
+    printf("File before recovery written\n");
+
     memset(buffer, 0, file_length);
 
     recover_part(new_parts, number_of_servers, server_attacked, parity);
@@ -64,8 +75,14 @@ void menu() {
         printf("Hmmm, this wasn't recovered correctly... Tough one!\n");
     }
 
+    char recovered_file[STR_LEN];
+    cat_before_ext(filename, "_recovered", recovered_file);
+    write_file(recovered_file, buffer, file_length);
+    printf("File after recovery written\n");
+
     free(connection_fds);
     free_parts(&new_parts, number_of_servers);
+    free(buffer);
 }
 
 int main() {

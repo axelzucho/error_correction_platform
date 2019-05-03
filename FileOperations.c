@@ -162,3 +162,17 @@ void free_parts(file_part **parts, int server_amount) {
     }
     free(*parts);
 }
+
+void write_file(char *filename, unsigned char *buffer, size_t file_length) {
+    FILE *file;
+
+    file = fopen(filename, "wb");
+
+    if (file == NULL) {
+        printf("Can't open file\n");
+    }
+
+    fwrite(buffer, file_length, sizeof(unsigned char), file);
+
+    fclose(file);
+}
