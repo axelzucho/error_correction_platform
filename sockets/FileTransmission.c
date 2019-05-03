@@ -51,16 +51,16 @@ void receive_part(int connection_fd, file_part *part) {
 
     recvString(connection_fd, buffer, MAX_STR_LEN);
     sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
-    sscanf(buffer, "%d", &part->parity_size);
+    sscanf(buffer, "%ld", (long int *)&part->parity_size);
 
-    recvString(connection_fd, buffer, MAX_STR_LEN);
-    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
-    if (strcmp(buffer, NO_INFORMATION) == 0) {
+    if ( part->parity_size == 0) {
+        recvString(connection_fd, buffer, MAX_STR_LEN);
         part->parity_file = NULL;
     } else {
         part->parity_file = malloc(part->parity_size * sizeof(unsigned char));
-        strcpy((char *) part->parity_file, buffer);
+        receive_file(connection_fd, &(part->parity_file), part->parity_size);
     }
+    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
 }
 
 void single_server() {
@@ -109,12 +109,13 @@ void send_single_part(int connection_fd, file_part *part) {
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
     char parity_size[MAX_PARITY_LEN];
-    sprintf(parity_size, "%d", part->parity_size);
+    sprintf(parity_size, "%ld", part->parity_size);
     sendString(connection_fd, parity_size, (int) strlen(int_buff));
     recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
 
     if (part->parity_size > 0) {
-        sendString(connection_fd, (char *) part->parity_file, part->parity_size);
+        send_file(connection_fd, part->parity_file, part->parity_size);
+        //sendString(connection_fd, (char *) part->parity_file, part->parity_size);
         recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
     } else {
         sendString(connection_fd, NO_INFORMATION, (int) strlen(NO_INFORMATION));
