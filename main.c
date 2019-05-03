@@ -7,9 +7,8 @@
 #include "sockets/FileTransmission.h"
 #include "tools.h"
 
-#define STR_LEN 100000
 
-void cat_before_ext(char *filename, char* adding, char dest[STR_LEN]){
+void cat_before_ext(char *filename, char* adding, char* dest){
     char *raw = strchr(filename, '.');
     strncpy(dest, filename, raw - filename);
     strcat(dest, adding);
@@ -18,7 +17,7 @@ void cat_before_ext(char *filename, char* adding, char dest[STR_LEN]){
 
 
 void menu() {
-    char filename[STR_LEN];
+    char filename[FILENAME_MAX];
     int number_of_servers;
     unsigned char *buffer = NULL;
     file_part *all_parts = NULL;
@@ -57,7 +56,7 @@ void menu() {
 
     memset(buffer, 0, file_length);
     merge_parts(new_parts, number_of_servers, buffer, file_length);
-    char broken_file[STR_LEN];
+    char broken_file[FILENAME_MAX];
     cat_before_ext(filename, "_broken", broken_file);
     write_file(broken_file, buffer, file_length);
     printf("File before recovery written\n");
@@ -75,7 +74,7 @@ void menu() {
         printf("Hmmm, this wasn't recovered correctly... Tough one!\n");
     }
 
-    char recovered_file[STR_LEN];
+    char recovered_file[FILENAME_MAX];
     cat_before_ext(filename, "_recovered", recovered_file);
     write_file(recovered_file, buffer, file_length);
     printf("File after recovery written\n");
