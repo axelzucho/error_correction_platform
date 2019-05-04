@@ -23,7 +23,8 @@ int read_file(char *filename, unsigned char **buffer, size_t *file_length);
 int write_file(char *filename, unsigned char *buffer, size_t file_length);
 
 // Divides a buffer into 'server_amount' of parts, bit by bit.
-void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all_parts, int server_amount, size_t file_length);
+void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all_parts, int server_amount,
+                   size_t file_length);
 
 // Merges the bits from the parts into a buffer.
 void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer, size_t file_length);
@@ -38,7 +39,7 @@ void loose_bits(file_part *part_to_loose);
 void recover_part(file_part *all_parts, int server_amount, int part_to_recover, unsigned char *parity_file);
 
 // Prints the part for debugging.
-void print_descriptive_buffer(file_part * part);
+void print_descriptive_buffer(file_part *part);
 
 // Frees all the memory allocated by the 'server_amount' of parts.
 void free_parts(file_part **parts, int server_amount);

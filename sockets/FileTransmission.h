@@ -9,16 +9,16 @@
 
 #include "../FileOperations.h"
 
+// Creates all the servers to hold the file parts.
 void create_all_servers(int *connection_fds, int server_amount);
 
+// Sends all the parts, one for each server.
 void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts);
 
+// Receives all the parts from each of the servers.
 void receive_all_parts(int *connection_fds, int server_amount, file_part *all_parts);
 
-void clear_information(file_part * part);
-
+// Sends the clear instruction to the specified server.
 void send_clear_instruction(int connection_fd);
-
-bool perform_action(char *buffer, int connection_fd, file_part *part);
 
 #endif //ERROR_CORRECTION_FILETRANSMISSION_H
