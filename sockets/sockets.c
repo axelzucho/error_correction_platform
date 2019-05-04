@@ -162,8 +162,8 @@ int connectSocket(char *address, char *port) {
     Receive the file descriptor of the socket, a pointer to where to store the data and the maximum size avaliable
     Returns 1 on successful receipt, or 0 if the connection has finished
 */
-int recvString(int connection_fd, void *buffer, int size) {
-    int chars_read;
+int recvString(int connection_fd, void *buffer, size_t size) {
+    ssize_t chars_read;
 
     // Clear the buffer
     bzero(buffer, size);
@@ -187,7 +187,7 @@ int recvString(int connection_fd, void *buffer, int size) {
     Send a message with error validation
     Receive the file descriptor, the pointer to the data, and the size of the data to send
 */
-void sendString(int connection_fd, void *buffer, int size) {
+void sendString(int connection_fd, void *buffer, size_t size) {
     // Send a message to the client, including an extra character for the '\0'
     if (send(connection_fd, buffer, size, 0) == -1) {
         fatalError("ERROR: send");

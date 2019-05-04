@@ -32,7 +32,7 @@ void receive_file(int connection_fd, unsigned char **file, size_t file_length){
 void receive_part(int connection_fd, file_part *part) {
     char buffer[MAX_STR_LEN];
     recvString(connection_fd, buffer, MAX_STR_LEN);
-    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
 
     int bit_amount;
     sscanf(buffer, "%d", &bit_amount);
@@ -47,10 +47,10 @@ void receive_part(int connection_fd, file_part *part) {
         recvString(connection_fd, buffer, MAX_STR_LEN);
         part->buffer = NULL;
     }
-    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
 
     recvString(connection_fd, buffer, MAX_STR_LEN);
-    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
     sscanf(buffer, "%ld", (long int *)&part->parity_size);
 
     if ( part->parity_size == 0) {
@@ -60,7 +60,7 @@ void receive_part(int connection_fd, file_part *part) {
         part->parity_file = malloc(part->parity_size * sizeof(unsigned char));
         receive_file(connection_fd, &(part->parity_file), part->parity_size);
     }
-    sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
 }
 
 void single_server() {
@@ -97,29 +97,29 @@ void send_single_part(int connection_fd, file_part *part) {
     char int_buff[MAX_PARITY_LEN];
     size_t buffer_size = (size_t) ceil((double) part->bit_amount / 8);
     sprintf(int_buff, "%d", (int) (part->bit_amount));
-    sendString(connection_fd, int_buff, (int) strlen(int_buff));
-    recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, int_buff, strlen(int_buff));
+    recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
 
     if(part->bit_amount == 0){
-        sendString(connection_fd, NO_INFORMATION, (int) strlen(NO_INFORMATION));
+        sendString(connection_fd, NO_INFORMATION, strlen(NO_INFORMATION));
     } else {
         send_file(connection_fd, part->buffer, buffer_size);
     }
 
-    recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+    recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
 
     char parity_size[MAX_PARITY_LEN];
     sprintf(parity_size, "%ld", part->parity_size);
-    sendString(connection_fd, parity_size, (int) strlen(int_buff));
-    recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+    sendString(connection_fd, parity_size, strlen(int_buff));
+    recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
 
     if (part->parity_size > 0) {
         send_file(connection_fd, part->parity_file, part->parity_size);
         //sendString(connection_fd, (char *) part->parity_file, part->parity_size);
-        recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+        recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
     } else {
-        sendString(connection_fd, NO_INFORMATION, (int) strlen(NO_INFORMATION));
-        recvString(connection_fd, int_buff, (int) strlen(RECEIVED_MESSAGE));
+        sendString(connection_fd, NO_INFORMATION, strlen(NO_INFORMATION));
+        recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
     }
 }
 
@@ -132,7 +132,7 @@ void send_all_parts(int *connection_fds, int server_amount, file_part *all_parts
 
 void receive_all_parts(int *connection_fds, int server_amount, file_part *all_parts) {
     for (int i = 0; i < server_amount; i++) {
-        sendString(connection_fds[i], (void *) SEND_PARTS_STR, (int) strlen(SEND_PARTS_STR) + 1);
+        sendString(connection_fds[i], (void *) SEND_PARTS_STR, strlen(SEND_PARTS_STR) + 1);
     }
     for (int i = 0; i < server_amount; i++) {
         receive_part(connection_fds[i], &all_parts[i]);
@@ -145,7 +145,7 @@ bool perform_action(char *buffer, int connection_fd, file_part *part) {
         return false;
     } else if (strcmp(buffer, DELETE_PART_STR) == 0) {
         loose_bits(part);
-        sendString(connection_fd, RECEIVED_MESSAGE, (int) strlen(RECEIVED_MESSAGE));
+        sendString(connection_fd, RECEIVED_MESSAGE, strlen(RECEIVED_MESSAGE));
         return true;
     }
     return true;
@@ -153,6 +153,6 @@ bool perform_action(char *buffer, int connection_fd, file_part *part) {
 
 void send_clear_instruction(int connection_fd){
     char buffer[MAX_STR_LEN];
-    sendString(connection_fd, DELETE_PART_STR, (int)strlen(DELETE_PART_STR));
+    sendString(connection_fd, DELETE_PART_STR, strlen(DELETE_PART_STR));
     recvString(connection_fd, buffer, MAX_STR_LEN);
 }

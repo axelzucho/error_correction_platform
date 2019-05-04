@@ -34,11 +34,15 @@ void menu() {
     printf("Please enter the file you want to test with:\n");
 
     //scanf("%s", filename);
-    strcpy(filename, "example.1.1.2.txt");
+    strcpy(filename, "example.txt");
 
     number_of_servers = 3;
 
-    read_file(filename, &buffer, &file_length);
+    int read_result = read_file(filename, &buffer, &file_length);
+    if(read_result < 0){
+        handle_reading_error(read_result, filename);
+        return;
+    }
 
     int *connection_fds = malloc(number_of_servers * sizeof(int));
     create_all_servers(connection_fds, 3);
