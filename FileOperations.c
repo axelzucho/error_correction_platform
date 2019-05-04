@@ -1,6 +1,4 @@
-//
-// Created by axelzucho on 15/04/19.
-//
+// Axel Zuchovicki A01022875
 
 #include <stdio.h>
 #include <stdlib.h>

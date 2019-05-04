@@ -1,6 +1,4 @@
-//
-// Created by axelzucho on 19/04/19.
-//
+// Axel Zuchovicki A01022875
 
 #ifndef ERROR_CORRECTION_TOOLS_H
 #define ERROR_CORRECTION_TOOLS_H

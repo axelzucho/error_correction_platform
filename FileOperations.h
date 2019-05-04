@@ -1,6 +1,4 @@
-//
-// Created by axelzucho on 15/04/19.
-//
+// Axel Zuchovicki A01022875
 
 #ifndef ERROR_CORRECTION_FILEOPERATIONS_H
 #define ERROR_CORRECTION_FILEOPERATIONS_H

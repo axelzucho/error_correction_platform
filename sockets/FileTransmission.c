@@ -1,6 +1,4 @@
-//
-// Created by axelzucho on 19/04/19.
-//
+// Axel Zuchovicki A01022875
 
 #include <math.h>
 #include "FileTransmission.h"
