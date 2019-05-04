@@ -10,6 +10,13 @@
 
 void cat_before_ext(char *filename, char* adding, char* dest){
     char *raw = strchr(filename, '.');
+    char *next_raw = strchr(raw+1, '.');
+
+    while (next_raw != NULL){
+        raw = next_raw;
+        next_raw = strchr(next_raw+1, '.');
+    }
+
     strncpy(dest, filename, raw - filename);
     strcat(dest, adding);
     strcat(dest, raw);
@@ -27,7 +34,7 @@ void menu() {
     printf("Please enter the file you want to test with:\n");
 
     //scanf("%s", filename);
-    strcpy(filename, "mosaic_090.tif");
+    strcpy(filename, "example.1.1.2.txt");
 
     number_of_servers = 3;
 
@@ -38,9 +45,8 @@ void menu() {
     unsigned char *parity = NULL;
     get_parity(buffer, number_of_servers, file_length, &parity);
     divide_buffer(buffer, parity, &all_parts, number_of_servers, file_length);
-    printf("Before sending all parts\n");
     send_all_parts(connection_fds, number_of_servers, all_parts);
-    printf("After sending all parts\n");
+    free_parts(&all_parts, number_of_servers);
     u_int32_t entire_crc = crc_32(buffer, file_length);
 
     printf("The file was separated and sent to three servers. Each server contains one third of the file\n");
@@ -48,7 +54,6 @@ void menu() {
     int server_attacked;
     //scanf("%d", &server_attacked);
     server_attacked = 0;
-    free_parts(&all_parts, number_of_servers);
 
     send_clear_instruction(connection_fds[server_attacked]);
     file_part *new_parts = calloc(sizeof(file_part), (size_t)number_of_servers);
