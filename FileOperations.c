@@ -31,12 +31,12 @@ void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all
     }
 
 #pragma omp parallel for default(none) shared(all_parts, server_amount, file_length, buffer)
-    for (int i = 0; i < file_length * 8; ++i) {
+    for (unsigned long i = 0; i < file_length * 8; ++i) {
         if (i / server_amount > (*all_parts)[i % server_amount].bit_amount) {
             continue;
         }
         bool current_val = (bool) (buffer[i / 8] & (1 << (7 - i % 8)));
-        int shift_amount = 7 - (i / server_amount) % 8;
+        unsigned long shift_amount = 7 - (i / server_amount) % 8;
 
         (*all_parts)[i % server_amount].buffer[i / (server_amount * 8)] |= current_val << shift_amount;
     }
@@ -44,13 +44,13 @@ void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all
 
 void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer, size_t file_length) {
 #pragma omp parallel for default(none) shared(all_parts, server_amount, file_length, buffer)
-    for (int i = 0; i < file_length * 8; ++i) {
+    for (unsigned long i = 0; i < file_length * 8; ++i) {
         if (i / server_amount >= all_parts[i % server_amount].bit_amount) {
             continue;
         }
         bool current_val = (bool) (all_parts[i % server_amount].buffer[i / (server_amount * 8)] &
                                    (1 << (7 - (i / server_amount) % 8)));
-        int shift_amount = 7 - (i % 8);
+        unsigned long shift_amount = 7 - (i % 8);
 
         buffer[i / 8] |= current_val << shift_amount;
     }
@@ -80,19 +80,19 @@ void get_parity(unsigned char *buffer, int server_amount, size_t file_length, un
     *parity_file = calloc((size_t) ceil((double) file_length / server_amount), sizeof(unsigned char));
 
 #pragma omp parallel for default(none) shared(buffer, server_amount, file_length, parity_file)
-    for (size_t i = 0; i < (file_length * 8); i += server_amount) {
+    for (unsigned long i = 0; i < (file_length * 8); i += server_amount) {
         bool current_value = false;
         for (int j = 0; j < server_amount; j++) {
             if (buffer[(i + j) / 8] & (1 << (7 - (i + j) % 8))) {
                 current_value = !current_value;
             }
         }
-        size_t shift_value = 7 - (i / server_amount) % 8;
+        unsigned long shift_value = 7 - (i / server_amount) % 8;
         (*parity_file)[i / (8 * server_amount)] |= current_value << shift_value;
     }
 
     bool current_value = false;
-    for(size_t i = file_length*8 - file_length % server_amount; i < file_length * 8; i++){
+    for(unsigned long i = file_length*8 - file_length % server_amount; i < file_length * 8; i++){
         if (buffer[i / 8] & (1 << (7 - i % 8))) {
            current_value = !current_value;
         }
@@ -122,7 +122,7 @@ void recover_part(file_part *all_parts, int server_amount, int part_to_recover, 
 
     // Iterate till an extra bit for a special case.
 #pragma omp parallel for default(none) shared(parity_file, all_parts, server_amount, part_to_recover, reference)
-    for (int i = 0; i <= all_parts[reference].bit_amount; i++) {
+    for (unsigned long i = 0; i <= all_parts[reference].bit_amount; i++) {
         bool current_value = false;
         for (int j = 0; j < server_amount; j++) {
             if (all_parts[j].bit_amount <= i || j == part_to_recover) continue;
@@ -139,7 +139,7 @@ void recover_part(file_part *all_parts, int server_amount, int part_to_recover, 
 }
 
 void print_descriptive_buffer(file_part *part) {
-    for (int i = 0; i < part->bit_amount / 8; ++i) {
+    for (unsigned long i = 0; i < part->bit_amount / 8; ++i) {
         printf("%d ", (int) (part->buffer[i]));
     }
     printf("\n");

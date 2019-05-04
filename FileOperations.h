@@ -8,9 +8,9 @@
 #include <stdlib.h>
 
 typedef struct file_part_s {
-    size_t bit_amount;
+    unsigned long bit_amount;
     unsigned char *buffer;
-    size_t parity_size;
+    unsigned long parity_size;
     unsigned char *parity_file;
 } file_part;
 
