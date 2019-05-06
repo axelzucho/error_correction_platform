@@ -90,6 +90,7 @@ void menu() {
     write_file(recovered_file, buffer, file_length);
     printf("File after recovery written\n");
 
+    free(parity);
     free(connection_fds);
     free_parts(&new_parts, number_of_servers);
     free(buffer);

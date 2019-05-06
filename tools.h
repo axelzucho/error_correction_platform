@@ -9,6 +9,7 @@
 #define NO_INFORMATION "NO INFORMATION TO SEND"
 #define MAX_STR_LEN 1000000
 #define MAX_PARITY_LEN 100000
+#define MIN_PARALLEL_LEN 100
 
 #include <string.h>
 #include <stdio.h>

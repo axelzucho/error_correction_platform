@@ -153,6 +153,7 @@ void send_single_part(int connection_fd, file_part *part) {
     recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
 
     char parity_size[MAX_PARITY_LEN];
+    memset(parity_size, 0, MAX_PARITY_LEN);
     sprintf(parity_size, "%ld", part->parity_size);
     // Send the parity size.
     sendString(connection_fd, parity_size, MAX_PARITY_LEN);

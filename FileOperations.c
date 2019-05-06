@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "FileOperations.h"
+#include "tools.h"
 
 void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all_parts, int server_amount,
                    size_t file_length) {
@@ -33,7 +34,7 @@ void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all
         }
     }
 
-#pragma omp parallel for default(none) shared(all_parts, server_amount, file_length, buffer)
+#pragma omp parallel for default(none) shared(all_parts, server_amount, file_length, buffer) if(file_length > MIN_PARALLEL_LEN)
     // Iterates for each bit.
     for (unsigned long i = 0; i < file_length * 8; ++i) {
         // If it is less than the amount of bits for the part, then just continue.
@@ -51,7 +52,7 @@ void divide_buffer(unsigned char *buffer, unsigned char *parity, file_part **all
 }
 
 void merge_parts(file_part *all_parts, int server_amount, unsigned char *buffer, size_t file_length) {
-#pragma omp parallel for default(none) shared(all_parts, server_amount, file_length, buffer)
+#pragma omp parallel for default(none) shared(all_parts, server_amount, file_length, buffer) if(file_length > MIN_PARALLEL_LEN)
     // Iterates through all the bits.
     for (unsigned long i = 0; i < file_length * 8; ++i) {
         // If it is less than the amount of bits for the part, then just continue.
@@ -99,7 +100,7 @@ void get_parity(unsigned char *buffer, int server_amount, size_t file_length, un
     *parity_file = calloc((size_t) ceil((double) file_length / server_amount), sizeof(unsigned char));
     size_t bit_amount = file_length * 8;
 
-#pragma omp parallel for default(none) shared(buffer, server_amount, parity_file, bit_amount)
+#pragma omp parallel for default(none) shared(buffer, server_amount, parity_file, bit_amount) if(file_length > MIN_PARALLEL_LEN)
     // Iterate through all the bits.
     for (unsigned long i = 0; i < bit_amount; i += server_amount) {
         // Start the bit in false.
@@ -158,7 +159,7 @@ void recover_part(file_part *all_parts, int server_amount, int part_to_recover, 
                                                sizeof(unsigned char));
 
     // Iterate till an extra bit for the special case.
-#pragma omp parallel for default(none) shared(parity_file, all_parts, server_amount, part_to_recover, reference)
+#pragma omp parallel for default(none) shared(parity_file, all_parts, server_amount, part_to_recover, reference) if(all_parts[reference].bit_amount/8 > MIN_PARALLEL_LEN)
     for (unsigned long i = 0; i <= all_parts[reference].bit_amount; i++) {
         // Start with an unset bit.
         bool current_value = false;
