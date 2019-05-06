@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include "libcrc-2.0/include/checksum.h"
 
 #include "FileOperations.h"
@@ -89,6 +90,10 @@ void menu() {
     cat_before_ext(filename, "_recovered", recovered_file);
     write_file(recovered_file, buffer, file_length);
     printf("File after recovery written\n");
+
+    for(int i = 0; i < number_of_servers; i++){
+        wait(NULL);
+    }
 
     free(parity);
     free(connection_fds);
