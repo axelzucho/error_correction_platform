@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
-#include "libcrc-2.0/include/checksum.h"
 
 #include "FileOperations.h"
 #include "sockets/FileTransmission.h"
@@ -30,6 +29,7 @@ void menu() {
     char filename[FILENAME_MAX];
     int number_of_servers;
     unsigned char *buffer = NULL;
+    unsigned char *initial_file = NULL;
     file_part *all_parts = NULL;
     size_t file_length;;
 
@@ -41,7 +41,7 @@ void menu() {
 
     number_of_servers = 3;
 
-    int read_result = read_file(filename, &buffer, &file_length);
+    int read_result = read_file(filename, &initial_file, &file_length);
     if(read_result < 0){
         handle_reading_error(read_result, filename);
         return;
@@ -50,11 +50,10 @@ void menu() {
     int *connection_fds = malloc(number_of_servers * sizeof(int));
     create_all_servers(connection_fds, 3);
     unsigned char *parity = NULL;
-    get_parity(buffer, number_of_servers, file_length, &parity);
-    divide_buffer(buffer, parity, &all_parts, number_of_servers, file_length);
+    get_parity(initial_file, number_of_servers, file_length, &parity);
+    divide_buffer(initial_file, parity, &all_parts, number_of_servers, file_length);
     send_all_parts(connection_fds, number_of_servers, all_parts);
     free_parts(&all_parts, number_of_servers);
-    u_int32_t entire_crc = crc_32(buffer, file_length);
 
     printf("The file was separated and sent to three servers. Each server contains one third of the file\n");
     printf("Please enter the server you want to attack (0, 1, or 2):\n");
@@ -66,7 +65,7 @@ void menu() {
     file_part *new_parts = calloc(sizeof(file_part), (size_t)number_of_servers);
     receive_all_parts(connection_fds, number_of_servers, new_parts);
 
-    memset(buffer, 0, file_length);
+    buffer = calloc(file_length, sizeof(unsigned char));
     merge_parts(new_parts, number_of_servers, buffer, file_length);
     char broken_file[FILENAME_MAX];
     memset(broken_file, 0, FILENAME_MAX);
@@ -79,7 +78,7 @@ void menu() {
     recover_part(new_parts, number_of_servers, server_attacked, parity);
     merge_parts(new_parts, number_of_servers, buffer, file_length);
 
-    if (entire_crc == crc_32(buffer, file_length)) {
+    if (strncmp ((char *)buffer, (char *)initial_file, file_length) == 0) {
         printf("File successfully recovered... They are the same!\n");
     } else {
         printf("Hmmm, this wasn't recovered correctly... Tough one!\n");
@@ -99,6 +98,7 @@ void menu() {
     free(connection_fds);
     free_parts(&new_parts, number_of_servers);
     free(buffer);
+    free(initial_file);
 }
 
 int main() {
