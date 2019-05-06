@@ -7,16 +7,15 @@
 
 #include "FileOperations.h"
 #include "sockets/FileTransmission.h"
-#include "tools.h"
 
 
-void cat_before_ext(char *filename, char* adding, char* dest){
+void cat_before_ext(char *filename, char *adding, char *dest) {
     char *raw = strchr(filename, '.');
-    char *next_raw = strchr(raw+1, '.');
+    char *next_raw = strchr(raw + 1, '.');
 
-    while (next_raw != NULL){
+    while (next_raw != NULL) {
         raw = next_raw;
-        next_raw = strchr(next_raw+1, '.');
+        next_raw = strchr(next_raw + 1, '.');
     }
 
     strncpy(dest, filename, raw - filename);
@@ -42,7 +41,7 @@ void menu() {
     number_of_servers = 3;
 
     int read_result = read_file(filename, &initial_file, &file_length);
-    if(read_result < 0){
+    if (read_result < 0) {
         handle_reading_error(read_result, filename);
         return;
     }
@@ -62,7 +61,7 @@ void menu() {
     server_attacked = 0;
 
     send_clear_instruction(connection_fds[server_attacked]);
-    file_part *new_parts = calloc(sizeof(file_part), (size_t)number_of_servers);
+    file_part *new_parts = calloc(sizeof(file_part), (size_t) number_of_servers);
     receive_all_parts(connection_fds, number_of_servers, new_parts);
 
     buffer = calloc(file_length, sizeof(unsigned char));
@@ -78,7 +77,7 @@ void menu() {
     recover_part(new_parts, number_of_servers, server_attacked, parity);
     merge_parts(new_parts, number_of_servers, buffer, file_length);
 
-    if (strncmp ((char *)buffer, (char *)initial_file, file_length) == 0) {
+    if (strncmp((char *) buffer, (char *) initial_file, file_length) == 0) {
         printf("File successfully recovered... They are the same!\n");
     } else {
         printf("Hmmm, this wasn't recovered correctly... Tough one!\n");
@@ -90,7 +89,7 @@ void menu() {
     write_file(recovered_file, buffer, file_length);
     printf("File after recovery written\n");
 
-    for(int i = 0; i < number_of_servers; i++){
+    for (int i = 0; i < number_of_servers; i++) {
         wait(NULL);
     }
 

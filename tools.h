@@ -11,8 +11,4 @@
 #define MAX_PARITY_LEN 100000
 #define MIN_PARALLEL_LEN 100
 
-#include <string.h>
-#include <stdio.h>
-
-
 #endif //ERROR_CORRECTION_TOOLS_H

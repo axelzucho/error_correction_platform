@@ -108,7 +108,7 @@ void get_parity(unsigned char *buffer, int server_amount, size_t file_length, un
         // Iterate through all the servers.
         for (int j = 0; j < server_amount; j++) {
             // If the bit corresponding to that server is set, then change the parity value.
-            if(i + j >= bit_amount){
+            if (i + j >= bit_amount) {
                 break;
             }
             if (buffer[(i + j) / 8] & (1 << (7 - (i + j) % 8))) {

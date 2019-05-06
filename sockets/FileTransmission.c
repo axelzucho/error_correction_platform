@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include "FileTransmission.h"
-#include "../FileOperations.h"
 #include "../tools.h"
 #include "sockets.h"
 
@@ -103,10 +102,10 @@ void single_server() {
     } while (perform_action(buffer, connection_fd, &part));
 
     // Free the allocated memory
-    if(part.parity_file != NULL){
+    if (part.parity_file != NULL) {
         free(part.parity_file);
     }
-    if (part.buffer != NULL){
+    if (part.buffer != NULL) {
         free(part.buffer);
     }
     close(connection_fd);
