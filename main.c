@@ -35,8 +35,8 @@ void menu() {
     printf("Welcome to the error correction testing platform\n");
     printf("Please enter the file you want to test with:\n");
 
-    //scanf("%s", filename);
-    strcpy(filename, "example.txt");
+    scanf("%s", filename);
+    //strcpy(filename, "mosaic_090.tif");
 
     number_of_servers = 3;
 
@@ -68,6 +68,7 @@ void menu() {
     memset(buffer, 0, file_length);
     merge_parts(new_parts, number_of_servers, buffer, file_length);
     char broken_file[FILENAME_MAX];
+    memset(broken_file, 0, FILENAME_MAX);
     cat_before_ext(filename, "_broken", broken_file);
     write_file(broken_file, buffer, file_length);
     printf("File before recovery written\n");
@@ -84,6 +85,7 @@ void menu() {
     }
 
     char recovered_file[FILENAME_MAX];
+    memset(recovered_file, 0, FILENAME_MAX);
     cat_before_ext(filename, "_recovered", recovered_file);
     write_file(recovered_file, buffer, file_length);
     printf("File after recovery written\n");

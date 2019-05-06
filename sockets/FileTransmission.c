@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include "FileTransmission.h"
+#include "../FileOperations.h"
 #include "../tools.h"
 #include "sockets.h"
 
@@ -91,18 +92,23 @@ void receive_part(int connection_fd, file_part *part) {
 // The loop for a single server.
 void single_server() {
     // We need to allocate the memory for the part before receiving it.
-    file_part *part = malloc(sizeof(file_part));
+    file_part part;
     int connection_fd = connectSocket("localhost", "9900");
     // Receive the part.
-    receive_part(connection_fd, part);
+    receive_part(connection_fd, &part);
     char buffer[MAX_STR_LEN];
     do {
         recvString(connection_fd, buffer, MAX_STR_LEN);
         // We keep receiving instructions till we send the part.
-    } while (perform_action(buffer, connection_fd, part));
+    } while (perform_action(buffer, connection_fd, &part));
 
-    // Free the allocated memory.
-    free(part);
+    // Free the allocated memory
+    if(part.parity_file != NULL){
+        free(part.parity_file);
+    }
+    if (part.buffer != NULL){
+        free(part.buffer);
+    }
     close(connection_fd);
 }
 
@@ -149,7 +155,7 @@ void send_single_part(int connection_fd, file_part *part) {
     char parity_size[MAX_PARITY_LEN];
     sprintf(parity_size, "%ld", part->parity_size);
     // Send the parity size.
-    sendString(connection_fd, parity_size, strlen(int_buff));
+    sendString(connection_fd, parity_size, MAX_PARITY_LEN);
     recvString(connection_fd, int_buff, strlen(RECEIVED_MESSAGE));
 
     // Check if we need to send the parity file.

@@ -8,7 +8,7 @@ SOURCES = main.c FileOperations.c sockets/fatal_error.c sockets/FileTransmission
 MAIN = error_correction.out
 
 $(MAIN): $(SOURCES)
-	gcc $^ -o $@ $(CFLAGS) $(LDFLAGS)
+	gcc $^ -o $@ $(CFLAGS) $(LDFLAGS) -g
 
 clean:
 	rm -f $(MAIN) *.o *.zip

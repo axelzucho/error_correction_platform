@@ -97,15 +97,19 @@ int read_file(char *filename, unsigned char **buffer, size_t *file_length) {
 void get_parity(unsigned char *buffer, int server_amount, size_t file_length, unsigned char **parity_file) {
     // Initialize the parity file.
     *parity_file = calloc((size_t) ceil((double) file_length / server_amount), sizeof(unsigned char));
+    size_t bit_amount = file_length * 8;
 
-#pragma omp parallel for default(none) shared(buffer, server_amount, file_length, parity_file)
+#pragma omp parallel for default(none) shared(buffer, server_amount, parity_file, bit_amount)
     // Iterate through all the bits.
-    for (unsigned long i = 0; i < (file_length * 8); i += server_amount) {
+    for (unsigned long i = 0; i < bit_amount; i += server_amount) {
         // Start the bit in false.
         bool current_value = false;
         // Iterate through all the servers.
         for (int j = 0; j < server_amount; j++) {
             // If the bit corresponding to that server is set, then change the parity value.
+            if(i + j >= bit_amount){
+                break;
+            }
             if (buffer[(i + j) / 8] & (1 << (7 - (i + j) % 8))) {
                 current_value = !current_value;
             }
@@ -118,7 +122,7 @@ void get_parity(unsigned char *buffer, int server_amount, size_t file_length, un
 
     bool current_value = false;
     // Iterate through the last bits that might not have completed the loop, not setting the value.
-    for (unsigned long i = file_length * 8 - file_length % server_amount; i < file_length * 8; i++) {
+    for (unsigned long i = bit_amount - file_length % server_amount; i < bit_amount; i++) {
         if (buffer[i / 8] & (1 << (7 - i % 8))) {
             current_value = !current_value;
         }
