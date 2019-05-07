@@ -4,3 +4,4 @@ CMakeLists.txt
 *.out
 *_recovered*
 *_broken*
+*.tif

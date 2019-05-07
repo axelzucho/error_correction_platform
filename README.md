@@ -69,6 +69,14 @@ Using this algorithm provides redundancy for a file using `17%` less storage tha
 
 If we increase the amount of servers, then the parity file becomes smaller, making the storage difference even larger.
 
+## Sources
+
+What is a Parity Bit? (2017, October 17). Retrieved April 20, 2019, from https://www.computerhope.com/jargon/p/paritybi.htm
+
+Barr, M. (2018, November 14). CRC Series, Part 2: CRC Mathematics and Theory. Retrieved April 20, 2019, from https://barrgroup.com/Embedded-Systems/How-To/CRC-Math-Theory
+
+Initial server creation based from code authored by Gilberto Echeverria - ITESM CSF.
+
 ## Author
 
 Axel Zuchovicki - ITESM CSF
