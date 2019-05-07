@@ -3,11 +3,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 #include <sys/wait.h>
 
 #include "FileOperations.h"
 #include "sockets/FileTransmission.h"
 
+void print_help() {
+    printf("The program has to options: -f and -s.\n\t-s: Should be followed by the server you want to delete "
+           "its information (0, 1 or 2). If no server is specified, its default value is 0.\n\t"
+           "-f: Should be followed by the path the file you want to upload to the program.\n");
+}
+
+// Parses the options.
+int parse_options(int argc, char **argv, char *filename, int *server_attacked) {
+    int parser;
+    bool sp_filename = false;
+    *server_attacked = 0;
+
+    while ((parser = getopt(argc, argv, "f:s:")) != -1) {
+        switch (parser) {
+            case 'f':
+                sp_filename = true;
+                strcpy(filename, optarg);
+                break;
+            case 's':
+                *server_attacked = atoi(optarg);
+                if(*server_attacked > 2 || *server_attacked < 0){
+                    return -1;
+                }
+                break;
+            case '?':
+                if (optopt == 's') {
+                    printf("The option -s has to have an argument.\n");
+                } else if (optopt == 'f') {
+                    printf("The option -f has to have an argument.\n");
+                } else {
+                    printf("Unknown option -%c, the only options available are -f and -s.\n", optopt);
+                }
+                return -1;
+            default:
+                abort();
+        }
+    }
+    // -f is necessary for the program to run.
+    if (!sp_filename) {
+        printf("Option -f should be specified.\n");
+        return -2;
+    }
+    return 0;
+}
 
 // Function to add a string before the extension.
 void cat_before_ext(char *filename, char *adding, char *dest) {
@@ -29,19 +74,22 @@ void cat_before_ext(char *filename, char *adding, char *dest) {
 }
 
 
-void menu() {
+void menu(int args, char **argv) {
     char filename[FILENAME_MAX];
     int number_of_servers;
+    int server_attacked;
     unsigned char *buffer = NULL;
     unsigned char *initial_file = NULL;
     file_part *all_parts = NULL;
     size_t file_length;;
 
-    printf("Welcome to the error correction testing platform\n");
-    printf("Please enter the file you want to test with:\n");
+    // Parses the input from the user, if it wasn't valid, print the help.
+    if(parse_options(args, argv, filename, &server_attacked) < 0){
+        print_help();
+        return;
+    }
 
-    scanf("%s", filename);
-    //strcpy(filename, "mosaic_090.tif");
+    printf("Welcome to the error correction testing platform\n");
 
     // Number of servers already defined, since this implementation makes more sense this way.
     number_of_servers = 3;
@@ -67,10 +115,6 @@ void menu() {
     free_parts(&all_parts, number_of_servers);
 
     printf("The file was separated and sent to three servers. Each server contains one third of the file\n");
-    printf("Please enter the server you want to attack (0, 1, or 2):\n");
-    int server_attacked;
-    //scanf("%d", &server_attacked);
-    server_attacked = 0;
 
     // Send the clear instruction to the server chosen.
     send_clear_instruction(connection_fds[server_attacked]);
@@ -88,7 +132,7 @@ void menu() {
     cat_before_ext(filename, "_broken", broken_file);
     // Writes the file without recovery.
     write_file(broken_file, buffer, file_length);
-    printf("File before recovery written\n");
+    printf("File before recovery written in path \'%s\'\n", broken_file);
 
     memset(buffer, 0, file_length);
     // Recovers the part missing.
@@ -101,7 +145,7 @@ void menu() {
     cat_before_ext(filename, "_recovered", recovered_file);
     // Writes the recovered file.
     write_file(recovered_file, buffer, file_length);
-    printf("File after recovery written\n");
+    printf("File after recovery written in path \'%s\'\n", recovered_file);
 
     // Check if both files match.
     if (strncmp((char *) buffer, (char *) initial_file, file_length) == 0) {
@@ -122,7 +166,7 @@ void menu() {
     free(initial_file);
 }
 
-int main() {
-    menu();
+int main(int args, char **argv) {
+    menu(args, argv);
     return 0;
 }
