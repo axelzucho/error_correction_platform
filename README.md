@@ -6,6 +6,21 @@ This repository contains a multi-process, multi-threaded program that simulates 
 
 The recovery is done with a parity check. 
 
+## How to use it
+
+1. Clone this repository
+2. Run `make` in the downloaded directory.
+3. Run `./error_correction.out -f <path_to_file> -s <server_to_delete>`
+    * `<path_to_file>` can be the path to any file with reading permission.
+    * `<server_to_delete>` can be any number between 0 and 2, indicating the server that will delete 
+    part of the file; the part that the program will try to recover. By default, this
+    has a value of `0`.
+4. Inspect the newly created files: 
+    * `<file_name>_broken.<file_ext>`: This file will contain the resulting file after 
+    the indicated part was deleted but before it was attempted to recover. 
+    * `<file_name>_recovered.<file_ext>`: This file will contain the resulting file after
+    recovering the part that was deleted.
+
 ## How it works
 
 The uploaded file is separated, bit by bit, into the number of servers specified. Keep in mind that in this implementation, 
@@ -36,7 +51,7 @@ If this is the case, then you would need to store the entire `3MB` file in anoth
 
 In this implementation, the algorithm used needs a total storage of:
 
-`f + 2*(f/s)`
+`Storage = f + 2*(f/s)`
 
 Where `f`: File size
 
@@ -48,7 +63,7 @@ the data is recovered if one of the servers is lost, if two servers contain this
 
 So, if 3 servers are used, the amount of memory needed is 
 
-`3 + 2*(3/3) = 5MB`
+`Storage = 3 + 2*(3/3) = 5MB`
 
 Using this algorithm provides redundancy for a file using `17%` less storage than the 'raw' approach for 3 servers.
 
