@@ -118,10 +118,12 @@ void menu(int args, char **argv) {
 
     // Send the clear instruction to the server chosen.
     send_clear_instruction(connection_fds[server_attacked]);
+    printf("Sent clear instruction to server %d\n", server_attacked);
     // Create the array of new parts.
     file_part *new_parts = calloc(sizeof(file_part), (size_t) number_of_servers);
     // Receive all parts from each server.
     receive_all_parts(connection_fds, number_of_servers, new_parts);
+    printf("Received all parts from the rest of the servers\n");
 
     // Allocate a new buffer where the file will be restored.
     buffer = calloc(file_length, sizeof(unsigned char));

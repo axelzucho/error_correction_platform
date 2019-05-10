@@ -27,6 +27,10 @@ The recovery is done with a parity check.
         * `File successfully recovered... They are the same!`
         * `Hmmm, this wasn't recovered correctly... Tough one!`
 
+Here's a screenshot of the input to the program and its output:
+
+![Example output](README-images/Run_example.png)
+
 ## How it works
 
 The uploaded file is separated, bit by bit, into the number of servers specified. Keep in mind that in this implementation, 
