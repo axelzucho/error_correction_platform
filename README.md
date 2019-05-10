@@ -12,14 +12,20 @@ The recovery is done with a parity check.
 2. Run `make` in the downloaded directory.
 3. Run `./error_correction.out -f <path_to_file> -s <server_to_delete>`
     * `<path_to_file>` can be the path to any file with reading permission.
+        * Using an example file: `Examples/example.txt`
     * `<server_to_delete>` can be any number between 0 and 2, indicating the server that will delete 
     part of the file; the part that the program will try to recover. By default, this
     has a value of `0`.
 4. Inspect the newly created files: 
     * `<file_name>_broken.<file_ext>`: This file will contain the resulting file after 
     the indicated part was deleted but before it was attempted to recover. 
+        * Using the example above: `Examples/example_broken.txt`
     * `<file_name>_recovered.<file_ext>`: This file will contain the resulting file after
     recovering the part that was deleted.
+        * Using the example above: `Examples/example_recovered.txt`
+    * You will see one of the two messages when the program finishes running: 
+        * `File successfully recovered... They are the same!`
+        * `Hmmm, this wasn't recovered correctly... Tough one!`
 
 ## How it works
 
